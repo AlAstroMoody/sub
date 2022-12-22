@@ -1,7 +1,6 @@
 <script setup>
 import {
   WidthType,
-  BorderStyle,
   Document,
   Paragraph,
   Packer,
@@ -15,9 +14,10 @@ import { ref } from "vue";
 
 const generateFile = () => {
   isWorking.value = true;
-
   let rowArray = [];
-  textArray.value.forEach((row) => {
+
+  for (let i = 0; i < textArray.value.length; i++) {
+    const row = textArray.value[i];
     const tableRow = new TableRow({
       children: [
         new TableCell({
@@ -27,7 +27,18 @@ const generateFile = () => {
           children: [new Paragraph({ children: [new TextRun(row[1])] })],
         }),
         new TableCell({
-          children: [new Paragraph({ children: [new TextRun(row[9])] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun(
+                  `${row[9]}${stringEnd(
+                    row[2],
+                    textArray.value[i + 1] ? textArray.value[i + 1][1] : ""
+                  )}`
+                ),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           children: [new Paragraph({ children: [new TextRun(row[2])] })],
@@ -35,7 +46,7 @@ const generateFile = () => {
       ],
     });
     rowArray.push(tableRow);
-  });
+  }
 
   const table = new Table({
     width: {
@@ -49,9 +60,8 @@ const generateFile = () => {
   const doc = new Document({ sections: [{ children: [table] }] });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "example.docx");
+    saveAs(blob, `${file.value.name.replace(".ass", "")}.docx`);
   });
-  // setTimeout(() => (isWorking.value = false), 1000);
 };
 
 const file = ref(null);
@@ -63,6 +73,19 @@ const getWomen = () => {
       women.value.push(string[4]);
     }
   });
+};
+
+const stringEnd = (first, second) => {
+  if (!second) return "";
+  console.log(first, second);
+  const targetTime = new Date("1970-01-01T" + "0" + first.split(".")[0]);
+  const secondTime = new Date("1970-01-01T" + "0" + second.split(".")[0]);
+  const time =
+    secondTime -
+    targetTime -
+    Number(first.split(".")[1]) +
+    Number(second.split(".")[1]);
+  return time < 1000 ? ".." : time > 1000 && time < 3000 ? " /" : " //";
 };
 
 const upload = (e) => {
@@ -90,7 +113,7 @@ const isWorking = ref(false);
 
 <template>
   <div v-if="isWorking" class="blaine">
-    <img src=" http://i.absurdopedia.net/e/e9/Blaine.JPG" />
+    <img src="http://i.absurdopedia.net/e/e9/Blaine.JPG" />
   </div>
   <div v-else>
     <div class="image-upload">
