@@ -1,0 +1,1 @@
+file.ass => file.doc
