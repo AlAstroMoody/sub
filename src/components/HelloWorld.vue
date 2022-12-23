@@ -24,16 +24,12 @@ const generateFile = () => {
           children: [new Paragraph({ children: [new TextRun(row[4])] })],
         }),
         new TableCell({
-          children: [new Paragraph({ children: [new TextRun(row[1])] })],
-        }),
-        new TableCell({
           children: [
             new Paragraph({
               children: [
                 new TextRun(
-                  `${row[9]}${stringEnd(
-                    row[2],
-                    textArray.value[i + 1] ? textArray.value[i + 1][1] : ""
+                  `${clearTime(row[1].split(".")[0])} - ${clearTime(
+                    row[2].split(".")[0]
                   )}`
                 ),
               ],
@@ -41,7 +37,11 @@ const generateFile = () => {
           ],
         }),
         new TableCell({
-          children: [new Paragraph({ children: [new TextRun(row[2])] })],
+          children: [
+            new Paragraph({
+              children: [new TextRun(row[9])],
+            }),
+          ],
         }),
       ],
     });
@@ -53,7 +53,7 @@ const generateFile = () => {
       size: 9000,
       type: WidthType.DXA,
     },
-    columnWidths: [1500, 1500, 5500, 1500],
+    columnWidths: [1500, 2500, 6000],
     rows: rowArray,
   });
 
@@ -66,26 +66,32 @@ const generateFile = () => {
 
 const file = ref(null);
 const textArray = ref(null);
-const women = ref([]);
-const getWomen = () => {
-  textArray.value.forEach((string) => {
-    if (!women.value.includes(string[4])) {
-      women.value.push(string[4]);
-    }
-  });
+
+const clearTime = (time) => {
+  if (time.startsWith("0:")) {
+    return time.slice(2);
+  } else return time;
 };
+
+// const women = ref([]);
+// const getWomen = () => {
+//   textArray.value.forEach((string) => {
+//     if (!women.value.includes(string[4])) {
+//       women.value.push(string[4]);
+//     }
+//   });
+// };
 
 const stringEnd = (first, second) => {
   if (!second) return "";
-  console.log(first, second);
   const targetTime = new Date("1970-01-01T" + "0" + first.split(".")[0]);
   const secondTime = new Date("1970-01-01T" + "0" + second.split(".")[0]);
   const time =
-    secondTime -
     targetTime -
-    Number(first.split(".")[1]) +
-    Number(second.split(".")[1]);
-  return time < 1000 ? ".." : time > 1000 && time < 3000 ? " /" : " //";
+    secondTime -
+    Number(second.split(".")[1]) +
+    Number(first.split(".")[1]);
+  return time > 1000 && time < 3000 ? "/ " : time > 3000 ? "// " : "";
 };
 
 const upload = (e) => {
@@ -96,19 +102,34 @@ const upload = (e) => {
     textArray.value = reader.result.split("\n").reduce((result, string) => {
       const stringArray = string.split(",");
       if (stringArray[0].startsWith("Dialogue: 0")) {
-        result.push(
-          stringArray.slice(0, 9).concat(stringArray.slice(9).flat().join())
-        );
+        const str = stringArray
+          .slice(0, 9)
+          .concat(stringArray.slice(9).flat().join());
+        if (result.length > 1 && str[4] === result[result.length - 1][4]) {
+          result[result.length - 1] = stringUnite(
+            result[result.length - 1],
+            str
+          );
+        } else result.push(str);
       }
       return result;
     }, []);
-    getWomen();
+    // getWomen();
+    showButton.value = true;
   };
-  reader.onerror = (err) => console.log(err);
+  reader.onerror = (err) => console.log("err", err);
   reader.readAsText(file.value);
 };
 
 const isWorking = ref(false);
+const showButton = ref(false);
+
+const stringUnite = (first, second) => {
+  const result = [...first];
+  result[9] += stringEnd(second[1], result[2]) + second[9];
+  result[2] = second[2];
+  return result;
+};
 </script>
 
 <template>
@@ -127,7 +148,7 @@ const isWorking = ref(false);
     </div>
     <div class="card" v-if="file">
       <div>{{ file.name }}</div>
-      <button type="button" @click="generateFile" v-if="!isWorking">
+      <button type="button" @click="generateFile" v-if="showButton">
         сделать магию
       </button>
     </div>
