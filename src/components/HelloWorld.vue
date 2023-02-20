@@ -16,20 +16,88 @@ const generateFile = () => {
   isWorking.value = true;
   let rowArray = [];
 
+  let lastTime = textArray.value[0][0];
+
+  let lastTempTime = 0;
+  let firstTempTime = textArray.value[0][0];
+
+  // массив данных для времени в конце строки
+  let tempArray = [];
+  if (documentary.value) {
+    for (let i = 0; i < textArray.value.length; i++) {
+      // если имя то же, и время от начала прошлого до начала этого меньше 20сек, то к строке добавить время начала этой
+      if (i > 0 && textArray.value[i][2] === textArray.value[i - 1][2]) {
+        if (lastTime === 0) lastTime = textArray.value[i][0];
+        if (timeDifference(textArray.value[i][0], lastTime) >= 20000) {
+          tempArray.push({
+            string: i,
+            time: `${clearTime(textArray.value[i][0]).split(".")[0]}`,
+          });
+          lastTime = 0;
+        }
+      } else {
+        if (i > 0) {
+          lastTempTime = textArray.value[i - 1][0];
+        }
+
+        lastTime = 0;
+        if (
+          lastTempTime &&
+          firstTempTime &&
+          timeDifference(textArray.value[i][0], lastTempTime) >= 60000
+        ) {
+          tempArray.forEach((el) => {
+            textArray.value[el.string][3] += ` (${el.time}) `;
+          });
+        }
+
+        firstTempTime = textArray.value[i][0];
+
+        tempArray = [];
+        lastTempTime = 0;
+      }
+    }
+    // если нет смены актера
+    tempArray.forEach((el) => {
+      textArray.value[el.string][3] += ` (${el.time}) `;
+    });
+  }
+
+  // добавляем слэши в конце фраз
+  const clearArray = [];
   for (let i = 0; i < textArray.value.length; i++) {
-    const row = textArray.value[i];
+    if (
+      i > 0 &&
+      textArray.value[i][2] === clearArray[clearArray.length - 1][2]
+    ) {
+      clearArray[clearArray.length - 1] = stringUnite(
+        clearArray[clearArray.length - 1],
+        textArray.value[i]
+      );
+    } else {
+      clearArray.push(textArray.value[i]);
+    }
+  }
+
+  for (let i = 0; i < clearArray.length; i++) {
+    const row = clearArray[i];
+    const firstTime = row[0];
+    const secondTime = row[1];
+    const name = row[2];
+    const text = row[3];
+
     const tableRow = new TableRow({
       children: [
         new TableCell({
-          children: [new Paragraph({ children: [new TextRun(row[4])] })],
+          children: [new Paragraph({ children: [new TextRun(name)] })],
         }),
         new TableCell({
           children: [
             new Paragraph({
               children: [
                 new TextRun(
-                  `${clearTime(row[1].split(".")[0])} - ${clearTime(
-                    row[2].split(".")[0]
+                  `${clearTime(firstTime.split(".")[0])} - ${clearTime(
+                    secondTime.split(".")[0]
                   )}`
                 ),
               ],
@@ -39,12 +107,13 @@ const generateFile = () => {
         new TableCell({
           children: [
             new Paragraph({
-              children: [new TextRun(row[9])],
+              children: [new TextRun(text)],
             }),
           ],
         }),
       ],
     });
+
     rowArray.push(tableRow);
   }
 
@@ -84,14 +153,19 @@ const clearTime = (time) => {
 
 const stringEnd = (first, second) => {
   if (!second) return "";
+  const time = timeDifference(first, second);
+  return time > 1000 && time < 3000 ? "/ " : time > 3000 ? "// " : "";
+};
+
+const timeDifference = (first, second) => {
   const targetTime = new Date("1970-01-01T" + "0" + first.split(".")[0]);
   const secondTime = new Date("1970-01-01T" + "0" + second.split(".")[0]);
-  const time =
+  return (
     targetTime -
     secondTime -
     Number(second.split(".")[1]) +
-    Number(first.split(".")[1]);
-  return time > 1000 && time < 3000 ? "/ " : time > 3000 ? "// " : "";
+    Number(first.split(".")[1])
+  );
 };
 
 const upload = (e) => {
@@ -105,16 +179,10 @@ const upload = (e) => {
         const str = stringArray
           .slice(0, 9)
           .concat(stringArray.slice(9).flat().join());
-        if (result.length > 1 && str[4] === result[result.length - 1][4]) {
-          result[result.length - 1] = stringUnite(
-            result[result.length - 1],
-            str
-          );
-        } else result.push(str);
+        result.push([str[1], str[2], str[4], str[9]]);
       }
       return result;
     }, []);
-    // getWomen();
     showButton.value = true;
   };
   reader.onerror = (err) => console.log("err", err);
@@ -126,15 +194,20 @@ const showButton = ref(false);
 
 const stringUnite = (first, second) => {
   const result = [...first];
-  result[9] += stringEnd(second[1], result[2]) + second[9];
-  result[2] = second[2];
+  result[3] += stringEnd(second[0], result[1]) + second[3];
+  result[1] = second[1];
   return result;
 };
+
+const documentary = ref(false);
 </script>
 
 <template>
   <div v-if="isWorking" class="blaine">
-    <img src="http://i.absurdopedia.net/e/e9/Blaine.JPG" />
+    <img
+      src="http://i.absurdopedia.net/e/e9/Blaine.JPG"
+      :class="{ magic: isWorking }"
+    />
   </div>
   <div v-else>
     <div class="image-upload">
@@ -148,6 +221,11 @@ const stringUnite = (first, second) => {
     </div>
     <div class="card" v-if="file">
       <div>{{ file.name }}</div>
+      <div>
+        <label>
+          <input type="checkbox" v-model="documentary" />Добавить таймкоды в строки?
+        </label>
+      </div>
       <button type="button" @click="generateFile" v-if="showButton">
         сделать магию
       </button>
@@ -164,5 +242,18 @@ const stringUnite = (first, second) => {
 }
 .blaine > img {
   margin: auto;
+  transition: all 10s;
+}
+.magic {
+  /* animation: blaine 10s ease forwards; */
+}
+@keyframes blaine {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(12.5);
+  }
 }
 </style>

@@ -1,5 +1,11 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
+import { createApp } from "vue";
+import "./style.css";
+import App from "./App.vue";
+import { initYandexMetrika } from "yandex-metrika-vue3";
 
-createApp(App).mount('#app')
+const app = createApp(App);
+
+app.use(initYandexMetrika, {
+  id: 92538971,
+  env: "production",
+});
