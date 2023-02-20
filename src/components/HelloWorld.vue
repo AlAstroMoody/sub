@@ -223,7 +223,8 @@ const documentary = ref(false);
       <div>{{ file.name }}</div>
       <div>
         <label>
-          <input type="checkbox" v-model="documentary" />Добавить таймкоды в строки?
+          <input type="checkbox" v-model="documentary" />Добавить таймкоды в
+          строки?
         </label>
       </div>
       <button type="button" @click="generateFile" v-if="showButton">
@@ -245,7 +246,7 @@ const documentary = ref(false);
   transition: all 10s;
 }
 .magic {
-  /* animation: blaine 10s ease forwards; */
+  animation: blaine 10s ease forwards;
 }
 @keyframes blaine {
   from {
