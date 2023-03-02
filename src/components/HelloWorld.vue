@@ -42,7 +42,10 @@ const generateFile = () => {
 
         lastTime = 0;
         try {
-          if (timeDifference(lastTempTime, firstTempTime) >= 60000) {
+          if (
+            timeDifference(lastTempTime, firstTempTime) >=
+            secondForPartitions.value * 1000
+          ) {
             tempArray.forEach((el) => {
               textArray.value[el.string][3] += ` (${el.time}) `;
             });
@@ -198,6 +201,8 @@ const stringUnite = (first, second) => {
 };
 
 const documentary = ref(false);
+
+const secondForPartitions = ref(40);
 </script>
 
 <template>
@@ -221,9 +226,19 @@ const documentary = ref(false);
       <div>{{ file.name }}</div>
       <div>
         <label>
-          <input type="checkbox" v-model="documentary" />Добавить таймкоды в
+          <input type="checkbox" v-model="documentary" />добавить таймкоды в
           строки?
         </label>
+        <div>
+          <div>
+            <label v-if="documentary">
+              <span style="display: block">
+                длина монолога для добавления тайм-кодов
+              </span>
+              <input type="number" v-model="secondForPartitions" /> сек.
+            </label>
+          </div>
+        </div>
       </div>
       <button type="button" @click="generateFile" v-if="showButton">
         сделать магию
