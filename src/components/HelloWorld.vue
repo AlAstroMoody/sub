@@ -41,15 +41,13 @@ const generateFile = () => {
         }
 
         lastTime = 0;
-        if (
-          lastTempTime &&
-          firstTempTime &&
-          timeDifference(textArray.value[i][0], lastTempTime) >= 60000
-        ) {
-          tempArray.forEach((el) => {
-            textArray.value[el.string][3] += ` (${el.time}) `;
-          });
-        }
+        try {
+          if (timeDifference(lastTempTime, firstTempTime) >= 60000) {
+            tempArray.forEach((el) => {
+              textArray.value[el.string][3] += ` (${el.time}) `;
+            });
+          }
+        } catch (e) {}
 
         firstTempTime = textArray.value[i][0];
 
