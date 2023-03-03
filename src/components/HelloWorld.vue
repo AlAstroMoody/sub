@@ -29,8 +29,12 @@ const generateFile = () => {
       if (i > 0 && textArray.value[i][2] === textArray.value[i - 1][2]) {
         if (lastTime === 0) lastTime = textArray.value[i][0];
         if (timeDifference(textArray.value[i][0], lastTime) >= 20000) {
+          console.log(
+            textArray.value[i - 1],
+            clearTime(textArray.value[i][0]).split(".")[0]
+          );
           tempArray.push({
-            string: i,
+            string: i - 1,
             time: `${clearTime(textArray.value[i][0]).split(".")[0]}`,
           });
           lastTime = 0;
@@ -47,7 +51,7 @@ const generateFile = () => {
             secondForPartitions.value * 1000
           ) {
             tempArray.forEach((el) => {
-              textArray.value[el.string][3] += ` (${el.time}) `;
+              textArray.value[el.string - 1][3] += ` (${el.time}) `;
             });
           }
         } catch (e) {}
