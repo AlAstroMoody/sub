@@ -27,14 +27,10 @@ const generateFile = () => {
     for (let i = 0; i < textArray.value.length; i++) {
       // если имя то же, и время от начала прошлого до начала этого меньше 20сек, то к строке добавить время начала этой
       if (i > 0 && textArray.value[i][2] === textArray.value[i - 1][2]) {
-        if (lastTime === 0) lastTime = textArray.value[i][0];
+        if (lastTime === 0) lastTime = textArray.value[i - 1][0];
         if (timeDifference(textArray.value[i][0], lastTime) >= 20000) {
-          console.log(
-            textArray.value[i - 1],
-            clearTime(textArray.value[i][0]).split(".")[0]
-          );
           tempArray.push({
-            string: i - 1,
+            string: i,
             time: `${clearTime(textArray.value[i][0]).split(".")[0]}`,
           });
           lastTime = 0;
