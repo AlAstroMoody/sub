@@ -12,8 +12,11 @@ import {
 import { saveAs } from "file-saver";
 import { ref } from "vue";
 
+const emit = defineEmits("showCanvas");
+
 const generateFile = () => {
   isWorking.value = true;
+  emit("showCanvas");
   let rowArray = [];
 
   let lastTime = textArray.value[0][0];
@@ -207,10 +210,8 @@ const secondForPartitions = ref(40);
 
 <template>
   <div v-if="isWorking" class="blaine">
-    <img
-      src="http://i.absurdopedia.net/e/e9/Blaine.JPG"
-      :class="{ magic: isWorking }"
-    />
+    <img src="src/assets/parker.gif" :class="{ magic2: isWorking }" />
+    <img src="src/assets/parker.gif" :class="{ magic: isWorking }" />
   </div>
   <div v-else>
     <div class="image-upload">
@@ -248,26 +249,26 @@ const secondForPartitions = ref(40);
 </template>
 
 <style scoped>
+img {
+  cursor: pointer;
+}
 .image-upload > input {
   display: none;
 }
 .blaine {
   display: flex;
+  margin-top: auto;
 }
 .blaine > img {
   margin: auto;
   transition: all 10s;
+  z-index: 2;
+  pointer-events: none;
 }
 .magic {
-  animation: blaine 10s ease forwards;
+  transform: scale(-1, 1);
 }
-@keyframes blaine {
-  from {
-    transform: scale(1);
-  }
-
-  to {
-    transform: scale(12.5);
-  }
+.magic2 {
+  transform: scale(1);
 }
 </style>
