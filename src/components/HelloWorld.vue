@@ -210,15 +210,13 @@ const secondForPartitions = ref(40);
 
 <template>
   <div v-if="isWorking" class="blaine">
-    <img src="src/assets/parker.gif" :class="{ magic2: isWorking }" />
-    <img src="src/assets/parker.gif" :class="{ magic: isWorking }" />
+    <img src="/parker.gif" :class="{ magic2: isWorking }" />
+    <img src="/parker.gif" :class="{ magic: isWorking }" />
   </div>
   <div v-else>
     <div class="image-upload">
       <label for="file-input">
-        <img
-          src="https://icons.iconarchive.com/icons/dtafalonso/android-lollipop/128/Downloads-icon.png"
-        />
+        <img src="/download.png" />
       </label>
 
       <input id="file-input" type="file" @input="upload($event)" />
