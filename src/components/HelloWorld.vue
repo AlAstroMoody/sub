@@ -50,7 +50,7 @@ const generateFile = () => {
             secondForPartitions.value * 1000
           ) {
             tempArray.forEach((el) => {
-              textArray.value[el.string - 1][3] += ` (${el.time}) `;
+              textArray.value[el.string - 1][3] += ` ${el.time} `;
             });
           }
         } catch (e) {}
